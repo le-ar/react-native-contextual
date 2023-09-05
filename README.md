@@ -4,8 +4,10 @@
 
 Context menu like `UIContextMenuInteraction` on iOS
 
-- ✅ Works seamlessly on both ios and android platforms
+- ✅ Android support
+- ✅ iOS support
 - ✅ Expo support
+- ✅ Works seamlessly on both ios and android platforms
 
 ## Installation
 
@@ -18,6 +20,13 @@ npm install react-native-contextual
 ```
 
 ## Usage
+
+### Blur
+
+Pass component to `background` prop of `ContextualRoot`. You can found an Example in [App.tsx](https://github.com/le-ar/react-native-contextual/blob/main/example/src/App.tsx)
+
+- Expo: [expo-blur](https://www.npmjs.com/package/expo-blur)
+- Native: [@react-native-community/blur](https://www.npmjs.com/package/@react-native-community/blur)
 
 ### Top of components
 
