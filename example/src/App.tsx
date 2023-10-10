@@ -36,6 +36,7 @@ export default function App() {
         <ScrollView style={{ flex: 1 }}>
           <Message left textLength={100} />
           <Message left textLength={5} />
+          <Message textLength={5} />
           <Message textLength={1500} />
           <Message left textLength={250} />
           <Message textLength={50} />

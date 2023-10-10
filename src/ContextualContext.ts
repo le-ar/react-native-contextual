@@ -16,6 +16,7 @@ export interface ContextualContextType {
   anim: SharedValue<number>;
   showContext: <P extends {}>(vars: ContextualContextVars<P>) => void;
   closeContext: () => void;
+  openContext?: () => void;
 }
 
 export const ContextualContext = React.createContext<ContextualContextType>({

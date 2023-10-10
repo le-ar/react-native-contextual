@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   Platform,
   Pressable,
@@ -33,7 +39,7 @@ export function Contextual<P extends {}>(props: ContextualProps<P>) {
   const { style, children, Menu, menuProps } = props;
 
   const context = useContext(ContextualContext);
-  const { showContext } = context;
+  const { anim, showContext, closeContext } = context;
 
   const [isContexted, setContexted] = useState(false);
   const [isTouchDown, setTouchDown] = useState(false);
@@ -116,22 +122,29 @@ export function Contextual<P extends {}>(props: ContextualProps<P>) {
     [isTouchDown]
   );
 
+  const contextValue = useMemo(
+    () => ({ anim, showContext, closeContext, openContext: onLongPress }),
+    [anim, showContext, closeContext, onLongPress]
+  );
+
   return (
-    <AnimatedPressable
-      onLongPress={onLongPress}
-      onTouchEnd={onTouchEnd}
-      style={[style, { opacity: isContexted ? 0 : 1 }, animStyle]}
-      ref={viewRef}
-    >
-      {children}
-      {isTouchDown && (
-        <View
-          style={{ position: 'absolute', opacity: 0 }}
-          onLayout={onLayoutMenu}
-        >
-          <Menu {...menuProps} />
-        </View>
-      )}
-    </AnimatedPressable>
+    <ContextualContext.Provider value={contextValue}>
+      <AnimatedPressable
+        onLongPress={onLongPress}
+        onTouchEnd={onTouchEnd}
+        style={[style, { opacity: isContexted ? 0 : 1 }, animStyle]}
+        ref={viewRef}
+      >
+        {children}
+        {isTouchDown && (
+          <View
+            style={{ position: 'absolute', opacity: 0 }}
+            onLayout={onLayoutMenu}
+          >
+            <Menu {...menuProps} />
+          </View>
+        )}
+      </AnimatedPressable>
+    </ContextualContext.Provider>
   );
 }

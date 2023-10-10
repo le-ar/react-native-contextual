@@ -21,6 +21,7 @@ import { ContextualContext } from './ContextualContext';
 export interface ContextualRootViewProps<P extends {}> {
   offsetTop?: number;
   offsetBottom?: number;
+  offsetRight?: number;
 
   background?: React.ReactNode;
 
@@ -42,6 +43,7 @@ export function ContextualRootView<P extends {}>(
   const {
     offsetTop: offsetTopProps,
     offsetBottom: offsetBottomProps,
+    offsetRight: offsetRightProps,
     background,
     view,
     viewLayout,
@@ -56,6 +58,7 @@ export function ContextualRootView<P extends {}>(
 
   const offsetTop = offsetTopProps ?? 0;
   const offsetBottom = offsetBottomProps ?? 0;
+  const offsetRight = offsetRightProps ?? 0;
 
   const window = useWindowDimensions();
   const context = useContext(ContextualContext);
@@ -74,7 +77,14 @@ export function ContextualRootView<P extends {}>(
     if (fullHeight > safeHeight) {
       maxScroll.value = fullHeight - safeHeight;
     }
-  }, []);
+  }, [
+    maxScroll,
+    menuSize.height,
+    offsetBottom,
+    offsetTop,
+    viewLayout.height,
+    window.height,
+  ]);
 
   const topStart = useDerivedValue(() => {
     const topSafe = offsetTop ?? 0;
@@ -97,6 +107,8 @@ export function ContextualRootView<P extends {}>(
 
     return topResult;
   }, [offsetTop, offsetBottom, viewLayout]);
+
+  const menuWidth = useSharedValue(0);
 
   useDerivedValue(() => {
     'worklet';
@@ -132,6 +144,20 @@ export function ContextualRootView<P extends {}>(
       transform: [{ scale: scaleAnim.value }],
     }),
     [scaleAnim, topAnim, leftAnim, scroll]
+  );
+
+  const menuStyle = useAnimatedStyle(
+    () => ({
+      transform: [
+        {
+          translateX: Math.min(
+            window.width - leftAnim.value - menuWidth.value - offsetRight,
+            0
+          ),
+        },
+      ],
+    }),
+    [menuWidth, leftAnim, window.width, offsetRight]
   );
 
   return (
@@ -171,7 +197,14 @@ export function ContextualRootView<P extends {}>(
           >
             {view}
           </View>
-          <Menu {...menuProps} />
+          <Animated.View
+            style={menuStyle}
+            onLayout={(e) => {
+              menuWidth.value = e.nativeEvent.layout.width;
+            }}
+          >
+            <Menu {...menuProps} />
+          </Animated.View>
         </Animated.View>
       </GestureDetector>
     </View>
