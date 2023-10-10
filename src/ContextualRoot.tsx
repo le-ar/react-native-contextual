@@ -10,11 +10,12 @@ import { ContextualRootView } from './ContextualRootView';
 export type ContextualRootProps = React.PropsWithChildren<{
   offsetTop?: number;
   offsetBottom?: number;
+  offsetRight?: number;
   background?: React.ReactNode;
 }>;
 
 export function ContextualRoot(props: ContextualRootProps) {
-  const { offsetTop, offsetBottom, background, children } = props;
+  const { offsetTop, offsetBottom, offsetRight, background, children } = props;
 
   const anim = useSharedValue(0);
   const scroll = useSharedValue(0);
@@ -32,7 +33,7 @@ export function ContextualRoot(props: ContextualRootProps) {
       setContext(null);
       context?.onClose?.();
     }, 250);
-  }, [context, setContext]);
+  }, [context, setContext, anim, scroll]);
 
   const value = useMemo<ContextualContextType>(
     () => ({ anim, showContext, closeContext }),
@@ -53,6 +54,7 @@ export function ContextualRoot(props: ContextualRootProps) {
         <ContextualRootView
           offsetTop={offsetTop}
           offsetBottom={offsetBottom}
+          offsetRight={offsetRight}
           background={background}
           view={context.view}
           viewLayout={context.viewLayout}
