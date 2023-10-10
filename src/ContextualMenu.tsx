@@ -44,7 +44,10 @@ export function ContextualMenu(props: ContextualMenuProps) {
         {actions.map((action, i) => (
           <Pressable
             key={action.key}
-            onPress={action.action}
+            onPress={() => {
+              action.action();
+              closeContext();
+            }}
             style={{
               paddingHorizontal: 12,
               paddingVertical: 8,
