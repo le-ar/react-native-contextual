@@ -1,13 +1,14 @@
 import { BlurView } from 'expo-blur';
 import * as React from 'react';
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 
-import { Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import {
   Contextual,
   ContextualContext,
   ContextualMenu,
   ContextualRoot,
+  type ContextualMenuProps,
 } from 'react-native-contextual';
 import {
   GestureHandlerRootView,
@@ -17,24 +18,18 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={style.flex1}>
       <ContextualRoot
         offsetTop={80}
         offsetBottom={20}
+        offsetRight={16}
         background={<ContextBackground />}
       >
-        <View
-          style={{
-            paddingTop: 80,
-            paddingBottom: 12,
-            alignItems: 'center',
-            borderBottomWidth: 1,
-          }}
-        >
-          <Text style={{ fontWeight: '700' }}>HEADER</Text>
+        <View style={style.header}>
+          <Text style={style.boldText}>HEADER</Text>
         </View>
-        <ScrollView style={{ flex: 1 }}>
-          <Message left textLength={100} />
+        <ScrollView style={style.flex1}>
+          <Message left textLength={100} asyncMenu />
           <Message left textLength={5} />
           <Message textLength={5} />
           <Message textLength={1500} />
@@ -42,63 +37,59 @@ export default function App() {
           <Message textLength={50} />
           <Message left textLength={2000} />
         </ScrollView>
-        <View
-          style={{
-            paddingVertical: 12,
-            alignItems: 'center',
-            borderTopWidth: 1,
-          }}
-        >
-          <Text style={{ fontWeight: '700' }}>BOTTOM</Text>
+        <View style={{}}>
+          <Text style={style.boldText}>BOTTOM</Text>
         </View>
       </ContextualRoot>
     </GestureHandlerRootView>
   );
 }
 
+const MENU_PROPS: ContextualMenuProps = {
+  actions: [
+    { key: 'Reply', label: 'Reply', action: () => {} },
+    { key: 'Edit', label: 'Edit', action: () => {} },
+    {
+      key: 'Delete',
+      label: 'Delete',
+      action: () => {},
+      color: 'red',
+    },
+  ],
+};
+
 interface MessageProps {
+  asyncMenu?: boolean;
   left?: boolean;
   textLength: number;
 }
 
 function Message(props: MessageProps) {
-  const { left, textLength } = props;
+  const { asyncMenu, left, textLength } = props;
 
   const text = TEXT.substring(0, textLength);
 
+  const menuProps = useMemo(() => {
+    if (asyncMenu) {
+      return async () => {
+        await new Promise<void>((res) => {
+          setTimeout(() => res(), 3000);
+        });
+        return MENU_PROPS;
+      };
+    }
+    return MENU_PROPS;
+  }, [asyncMenu]);
+
   return (
-    <View
-      style={{
-        width: '100%',
-        paddingVertical: 4,
-        paddingHorizontal: 12,
-        alignItems: left === true ? 'flex-start' : 'flex-end',
-      }}
-    >
-      <View style={{ maxWidth: '80%' }}>
-        <Contextual
+    <View style={[style.messageContainer, left && style.messageContainerLeft]}>
+      <View style={style.messageLimit}>
+        <Contextual<ContextualMenuProps>
           style={{}}
           Menu={ContextualMenu}
-          menuProps={{
-            actions: [
-              { key: 'Reply', label: 'Reply', action: () => {} },
-              { key: 'Edit', label: 'Edit', action: () => {} },
-              {
-                key: 'Delete',
-                label: 'Delete',
-                action: () => {},
-                color: 'red',
-              },
-            ],
-          }}
+          menuProps={menuProps}
         >
-          <View
-            style={{
-              backgroundColor: left === true ? '#E8E8E8' : '#B9D9EB',
-              borderRadius: 8,
-              padding: 4,
-            }}
-          >
+          <View style={[style.message, left && style.messageLeft]}>
             <Text>{text}</Text>
           </View>
         </Contextual>
@@ -127,7 +118,40 @@ function ContextBackground() {
 
   return (
     <Animated.View style={viewStyle}>
-      <BlurView style={{ width: '100%', height: '100%' }} />
+      <BlurView style={style.fullSize} />
     </Animated.View>
   );
 }
+
+const style = StyleSheet.create({
+  header: {
+    paddingTop: 80,
+    paddingBottom: 12,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+  },
+  footer: {
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderTopWidth: 1,
+  },
+  boldText: { fontWeight: '700' },
+  flex1: { flex: 1 },
+  fullSize: { width: '100%', height: '100%' },
+  messageLimit: { maxWidth: '80%' },
+  messageContainer: {
+    width: '100%',
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    alignItems: 'flex-end',
+  },
+  messageContainerLeft: {
+    alignItems: 'flex-start',
+  },
+  message: {
+    backgroundColor: '#B9D9EB',
+    borderRadius: 8,
+    padding: 4,
+  },
+  messageLeft: { backgroundColor: '#E8E8E8' },
+});

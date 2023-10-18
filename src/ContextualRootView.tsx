@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useMemo } from 'react';
 import {
   Pressable,
+  StyleSheet,
   View,
   useWindowDimensions,
   type StyleProp,
@@ -139,6 +140,7 @@ export function ContextualRootView<P extends {}>(
 
   const viewAnimStyle = useAnimatedStyle(
     () => ({
+      position: 'absolute',
       left: viewLayout.x,
       top: topAnim.value + scroll.value,
       transform: [{ scale: scaleAnim.value }],
@@ -161,31 +163,14 @@ export function ContextualRootView<P extends {}>(
   );
 
   return (
-    <View
-      style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
-    >
-      <Pressable
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        }}
-        onPress={closeContext}
-      >
+    <View style={style.inset0}>
+      <Pressable style={style.inset0} onPress={closeContext}>
         {background}
       </Pressable>
 
       <GestureDetector gesture={gesture}>
-        <Animated.View
-          style={[
-            {
-              position: 'absolute',
-            },
-            viewAnimStyle,
-          ]}
-        >
+        <Animated.View style={viewAnimStyle}>
+          <Pressable style={style.inset0} onPress={closeContext} />
           <View
             style={[
               viewStyle,
@@ -210,3 +195,13 @@ export function ContextualRootView<P extends {}>(
     </View>
   );
 }
+
+const style = StyleSheet.create({
+  inset0: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+});
