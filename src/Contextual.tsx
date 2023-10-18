@@ -136,6 +136,7 @@ export function Contextual<P extends {}>(props: ContextualProps<P>) {
 
   const animStyle = useAnimatedStyle(
     () => ({
+      opacity: isContexted ? (anim.value < 0.1 ? 1 : 0) : 1,
       transform: [
         {
           scale: isTouchDown
@@ -144,7 +145,7 @@ export function Contextual<P extends {}>(props: ContextualProps<P>) {
         },
       ],
     }),
-    [isTouchDown]
+    [isTouchDown, isContexted, anim]
   );
 
   const contextValue = useMemo(
@@ -157,7 +158,7 @@ export function Contextual<P extends {}>(props: ContextualProps<P>) {
       <AnimatedPressable
         onLongPress={onLongPress}
         onTouchEnd={onTouchEnd}
-        style={[style, { opacity: isContexted ? 0 : 1 }, animStyle]}
+        style={[style, animStyle]}
         ref={viewRef}
       >
         {children}

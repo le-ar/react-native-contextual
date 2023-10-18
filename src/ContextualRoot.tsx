@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSharedValue, withTiming } from 'react-native-reanimated';
+import { runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
 import {
   ContextualContext,
   type ContextualContextType,
@@ -27,12 +27,14 @@ export function ContextualRoot(props: ContextualRootProps) {
 
   const showContext = useCallback((vars) => setContext(vars), [setContext]);
   const closeContext = useCallback(() => {
+    const onClose = context?.onClose ?? (() => {});
     scroll.value = withTiming(0, { duration: 250 });
-    anim.value = withTiming(0, { duration: 250 });
-    setTimeout(() => {
-      setContext(null);
-      context?.onClose?.();
-    }, 250);
+    anim.value = withTiming(0, { duration: 250 }, (finished) => {
+      if (finished) {
+        runOnJS(setContext)(null);
+        runOnJS(onClose)();
+      }
+    });
   }, [context, setContext, anim, scroll]);
 
   const value = useMemo<ContextualContextType>(
