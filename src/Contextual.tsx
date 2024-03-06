@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import {
   Platform,
-  Pressable,
   StatusBar,
   View,
   type LayoutChangeEvent,
@@ -15,13 +14,13 @@ import {
   type ViewStyle,
 } from 'react-native';
 import Animated, {
+  runOnJS,
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
 import { ContextualContext } from './ContextualContext';
 import { Waiter } from './utils';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 
 export type ContextualProps<P extends {}> = React.PropsWithChildren<{
   style: StyleProp<ViewStyle>;
@@ -54,7 +53,7 @@ export function Contextual<P extends {}>(props: ContextualProps<P>) {
   const [menuProps, setMenuProps] = useState<P>();
   const dataWaiter = useRef<Waiter<DataWaiter<P>> | null>(null);
 
-  const viewRef = useRef<View>(null);
+  const viewRef = useRef<Animated.View>(null);
 
   const onLayoutMenu = useCallback(
     (event: LayoutChangeEvent) => {
@@ -153,24 +152,30 @@ export function Contextual<P extends {}>(props: ContextualProps<P>) {
     [anim, showContext, closeContext, onLongPress]
   );
 
+  const gesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .activateAfterLongPress(300)
+        .onStart(runOnJS(onLongPress))
+        .onEnd(runOnJS(onTouchEnd)),
+    [onLongPress, onTouchEnd]
+  );
+
   return (
     <ContextualContext.Provider value={contextValue}>
-      <AnimatedPressable
-        onLongPress={onLongPress}
-        onTouchEnd={onTouchEnd}
-        style={[style, animStyle]}
-        ref={viewRef}
-      >
-        {children}
-        {isTouchDown && menuProps != null && (
-          <View
-            style={{ position: 'absolute', opacity: 0 }}
-            onLayout={onLayoutMenu}
-          >
-            <Menu {...menuProps} />
-          </View>
-        )}
-      </AnimatedPressable>
+      <GestureDetector gesture={gesture}>
+        <Animated.View style={[style, animStyle]} ref={viewRef}>
+          {children}
+          {isTouchDown && menuProps != null && (
+            <View
+              style={{ position: 'absolute', opacity: 0 }}
+              onLayout={onLayoutMenu}
+            >
+              <Menu {...menuProps} />
+            </View>
+          )}
+        </Animated.View>
+      </GestureDetector>
     </ContextualContext.Provider>
   );
 }
