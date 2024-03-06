@@ -1,6 +1,6 @@
 {
   "name": "react-native-contextual",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "description": "context menu",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
