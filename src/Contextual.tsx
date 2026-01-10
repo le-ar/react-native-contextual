@@ -156,8 +156,16 @@ export function Contextual<P extends {}>(props: ContextualProps<P>) {
     () =>
       Gesture.Pan()
         .activateAfterLongPress(300)
-        .onStart(runOnJS(onLongPress))
-        .onEnd(runOnJS(onTouchEnd)),
+        .onStart(() => {
+          'worklet';
+
+          runOnJS(onLongPress)();
+        })
+        .onEnd(() => {
+          'worklet';
+
+          runOnJS(onTouchEnd)();
+        }),
     [onLongPress, onTouchEnd]
   );
 
